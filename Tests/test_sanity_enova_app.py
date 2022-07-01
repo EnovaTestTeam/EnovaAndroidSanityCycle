@@ -126,6 +126,15 @@ class TestEnovaApp(BaseTest):
     def test_open_create_meeting_page(self):
         pass
 
+    @allure.description("TEST: Welcome screen overview")
+    def test_welcome_screen(self):
+        print("Test_WelcomeScreen")
+        self.welcome_screen = WelcomeScreen(self.driver)
+        assert self.welcome_screen.check_settings_availability()
+        assert self.welcome_screen.check_app_version()
+        assert self.welcome_screen.check_customer_description()
+        assert self.welcome_screen.check_main_title()
+
     """Create meetings: meetings name is presented"""
     """Create meetings: Tags are presented"""
     """Create meetings: add tag"""
