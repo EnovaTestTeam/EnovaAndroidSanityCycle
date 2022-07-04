@@ -1,11 +1,14 @@
 import allure
 import pytest
+
+from Pages.WelcomeScreen import WelcomeScreen
 from Tests.test_base import BaseTest
 from Pages.LoginPage import LoginPage
 from Pages.ChooseCustomersScreen import ChooseCustomerScreen
 from TestData.config import TestData
 from Pages.SettingsPage import SettingsInApp
 from Pages.EnovaChatPage import EnovaChatPage
+from Pages.MeetingPage import MeetingPage
 
 
 #@pytest.mark.parametrize("login_data", [TestData.LOGIN_DATA])
@@ -26,6 +29,17 @@ class TestEnovaApp(BaseTest):
     #
     #     server_name = self.settings.get_server()
     #     assert server_name == login_data["SERVER"]
+
+    """Welcome screen owerview test"""
+
+    @allure.description("TEST: Welcome screen overview")
+    def test_welcome_screen(self):
+        print("Test_WelcomeScreen")
+        self.welcome_screen = WelcomeScreen(self.driver)
+        assert self.welcome_screen.check_settings_availability()
+        assert self.welcome_screen.check_app_version()
+        assert self.welcome_screen.check_customer_description()
+        assert self.welcome_screen.check_main_title()
 
     """Privacy Policy checking test"""
 
@@ -124,18 +138,32 @@ class TestEnovaApp(BaseTest):
 
     @allure.description("Opening meeting creation page")
     def test_open_create_meeting_page(self):
-        pass
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Open 'Create meeting' page"):
+            self.meetings.open_create_meeting_page()
 
-    @allure.description("TEST: Welcome screen overview")
-    def test_welcome_screen(self):
-        print("Test_WelcomeScreen")
-        self.welcome_screen = WelcomeScreen(self.driver)
-        assert self.welcome_screen.check_settings_availability()
-        assert self.welcome_screen.check_app_version()
-        assert self.welcome_screen.check_customer_description()
-        assert self.welcome_screen.check_main_title()
+        with allure.step("Check that 'Create meeting' page is opened"):
+            assert self.meetings.is_create_meeting_page(), \
+                "'Create meeting page is not opened or page header is incorrect'"
+        with allure.step("Check 'Create meeting' header text"):
+            assert self.meetings.get_meeting_create_header_text() == "New Meeting" or self.meetings.get_meeting_create_header_text() == "Новое совещание", \
+                "Incorrect header text on 'Create meeting' page"
 
     """Create meetings: meetings name is presented"""
+
+    @allure.description("Check meeting name on 'Create meeting' page")
+    def test_open_create_meeting_page(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Open 'Create meeting' page"):
+            self.meetings.open_create_meeting_page()
+
+        with allure.step("Check that 'Create meeting' page is opened"):
+            assert self.meetings.is_create_meeting_page(), \
+                "'Create meeting page is not opened or page header is incorrect'"
+        with allure.step("Check 'Create meeting' header text"):
+            assert self.meetings.get_meeting_create_header_text() == "New Meeting" or self.meetings.get_meeting_create_header_text() == "Новое совещание", \
+                "Incorrect header text on 'Create meeting' page"
+
     """Create meetings: Tags are presented"""
     """Create meetings: add tag"""
     """Create new meeting"""
