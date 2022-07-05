@@ -136,6 +136,7 @@ class TestEnovaApp(BaseTest):
 
     """Create meetings: meeting creation window is opened"""
 
+    @pytest.mark.skip
     @allure.description("Opening meeting creation page")
     def test_open_create_meeting_page(self):
         self.meetings = MeetingPage(self.driver)
@@ -157,12 +158,13 @@ class TestEnovaApp(BaseTest):
         with allure.step("Open 'Create meeting' page"):
             self.meetings.open_create_meeting_page()
 
-        with allure.step("Check that 'Create meeting' page is opened"):
-            assert self.meetings.is_create_meeting_page(), \
-                "'Create meeting page is not opened or page header is incorrect'"
-        with allure.step("Check 'Create meeting' header text"):
-            assert self.meetings.get_meeting_create_header_text() == "New Meeting" or self.meetings.get_meeting_create_header_text() == "Новое совещание", \
-                "Incorrect header text on 'Create meeting' page"
+        with allure.step("Check that meeting name is presented on Create meeting page"):
+            assert self.meetings.is_meeting_name_on_create_meeting_page(), \
+                "Meeting name field is not presented on 'Create meeting' page "
+
+        with allure.step("Check meeting name on 'Create meeting' page"):
+            assert self.meetings.get_meeting_name_create_meeting_page() == "", \
+                "Format on meeting name is incorrect"
 
     """Create meetings: Tags are presented"""
     """Create meetings: add tag"""

@@ -6,8 +6,10 @@ from Pages.EnovaChatPage import EnovaChatPage
 
 class MeetingPage(BasePage):
     MEETING_BUTTON = (By.ID, "com.harman.enova.beta:id/meetingButton")
-    MEETING_CREATE_HEADER = (By.ID, "com.harman.enova.beta:id/meetingCreateHeader")
-    MEETING_CREATE_HEADER_TEXT = (By.ID, "com.harman.enova.beta:id/titleText")
+    CREATE_MEETING_HEADER = (By.ID, "com.harman.enova.beta:id/meetingCreateHeader")
+    CREATE_MEETING_HEADER_TEXT = (By.ID, "com.harman.enova.beta:id/titleText")
+    CREATE_MEETING_NAME = (By.ID, "com.harman.enova.beta:id/meetingTitleLayout")
+    CREATE_MEETING_NAME_TEXT = (By.ID, "com.harman.enova.beta:id/meetingNameEditText")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -19,9 +21,15 @@ class MeetingPage(BasePage):
         self.click_by_locator(self.MEETING_BUTTON)
 
     def is_create_meeting_page(self):
-        return self.is_element_by_locator(self.MEETING_CREATE_HEADER)
+        return self.is_element_by_locator(self.CREATE_MEETING_HEADER)
 
     def get_meeting_create_header_text(self):
-        return self.get_element_text_by_locator(self.MEETING_CREATE_HEADER_TEXT)
+        return self.get_element_text_by_locator(self.CREATE_MEETING_HEADER_TEXT)
+
+    def is_meeting_name_on_create_meeting_page(self):
+        return self.is_element_by_locator(self.CREATE_MEETING_NAME)
+
+    def get_meeting_name_create_meeting_page(self):
+        return self.get_element_text_by_locator(self.CREATE_MEETING_NAME_TEXT)
 
 
