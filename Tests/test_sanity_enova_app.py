@@ -1,5 +1,9 @@
 import allure
 import pytest
+import re
+from datetime import datetime
+
+from allure_commons.types import AttachmentType
 
 from Pages.WelcomeScreen import WelcomeScreen
 from Tests.test_base import BaseTest
@@ -11,7 +15,6 @@ from Pages.EnovaChatPage import EnovaChatPage
 from Pages.MeetingPage import MeetingPage
 
 
-#@pytest.mark.parametrize("login_data", [TestData.LOGIN_DATA])
 class TestEnovaApp(BaseTest):
 
     """Registering device test"""
@@ -137,24 +140,24 @@ class TestEnovaApp(BaseTest):
 
     """Create meetings: meeting creation window is opened"""
 
-    @pytest.mark.skip
     @allure.description("Opening meeting creation page")
     def test_open_create_meeting_page(self):
         self.meetings = MeetingPage(self.driver)
         with allure.step("Open 'Create meeting' page"):
             self.meetings.open_create_meeting_page()
-
         with allure.step("Check that 'Create meeting' page is opened"):
             assert self.meetings.is_create_meeting_page(), \
                 "'Create meeting page is not opened or page header is incorrect'"
         with allure.step("Check 'Create meeting' header text"):
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
             assert self.meetings.get_meeting_create_header_text() == "New Meeting" or self.meetings.get_meeting_create_header_text() == "Новое совещание", \
                 "Incorrect header text on 'Create meeting' page"
 
     """Create meetings: meetings name is presented"""
 
+    @pytest.mark.skip
     @allure.description("Check meeting name on 'Create meeting' page")
-    def test_open_create_meeting_page(self):
+    def test_meeting_name_on_create_meeting_page(self):
         self.meetings = MeetingPage(self.driver)
         with allure.step("Open 'Create meeting' page"):
             self.meetings.open_create_meeting_page()
@@ -164,7 +167,9 @@ class TestEnovaApp(BaseTest):
                 "Meeting name field is not presented on 'Create meeting' page "
 
         with allure.step("Check meeting name on 'Create meeting' page"):
-            assert self.meetings.get_meeting_name_create_meeting_page() == "", \
+            current_datetime = datetime.now()
+            print(current_datetime)
+            assert re.match(r"[a-z|A-Z]*_[0-9]{2}_[a-z|A-Z]*_[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}", self.meetings.get_meeting_name_create_meeting_page()), \
                 "Format on meeting name is incorrect"
 
     """Create meetings: Tags are presented"""

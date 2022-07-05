@@ -18,9 +18,9 @@ def driver(request):
 
 @pytest.fixture(scope='function', params=[
     ("US West", "tbd@gmail.com", "WebSocket", "English"),
-    ("US West", "tbd@gmail.com", "HTTPS", "English"),
-    ("US West", "tbd@gmail.com", "WebSocket", "Russian"),
-    ("US West", "tbd@gmail.com", "HTTPS", "Russian"),
+    #("US West", "tbd@gmail.com", "HTTPS", "English"),
+    #("US West", "tbd@gmail.com", "WebSocket", "Russian"),
+    #("US West", "tbd@gmail.com", "HTTPS", "Russian"),
 ])
 def login(driver, request):
     server = request.param[0]
