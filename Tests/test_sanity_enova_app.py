@@ -30,8 +30,9 @@ class TestEnovaApp(BaseTest):
     #     server_name = self.settings.get_server()
     #     assert server_name == login_data["SERVER"]
 
-    """Welcome screen owerview test"""
+    """Welcome screen overview test"""
 
+    @pytest.mark.skip
     @allure.description("TEST: Welcome screen overview")
     def test_welcome_screen(self):
         print("Test_WelcomeScreen")
