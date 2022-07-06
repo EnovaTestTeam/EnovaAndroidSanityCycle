@@ -63,7 +63,7 @@ class LoginPage(BasePage):
         customers_language_list = self.find_elements(self.CUSTOMERS_LANGUAGE_LIST)
         for i in range(len(customers_language_list)):
             element = self.find_elements(self.CUSTOMERS_LANGUAGE_LIST)[i]
-            if self.get_element_text_by_element(customers_language_list[i]) == language:
+            if self.get_element_text_by_element(element) == language:
                 continue
             self.click_by_element(element)
             languages = self.find_elements(self.LANGUAGES)

@@ -1,14 +1,20 @@
 import allure
 import pytest
+import re
+from datetime import datetime
+
+from allure_commons.types import AttachmentType
+
+from Pages.WelcomeScreen import WelcomeScreen
 from Tests.test_base import BaseTest
 from Pages.LoginPage import LoginPage
 from Pages.ChooseCustomersScreen import ChooseCustomerScreen
 from TestData.config import TestData
 from Pages.SettingsPage import SettingsInApp
 from Pages.EnovaChatPage import EnovaChatPage
+from Pages.MeetingPage import MeetingPage
 
 
-#@pytest.mark.parametrize("login_data", [TestData.LOGIN_DATA])
 class TestEnovaApp(BaseTest):
 
     """Registering device test"""
@@ -27,6 +33,18 @@ class TestEnovaApp(BaseTest):
     #     server_name = self.settings.get_server()
     #     assert server_name == login_data["SERVER"]
 
+    """Welcome screen overview test"""
+
+    @pytest.mark.skip
+    @allure.description("TEST: Welcome screen overview")
+    def test_welcome_screen(self):
+        print("Test_WelcomeScreen")
+        self.welcome_screen = WelcomeScreen(self.driver)
+        assert self.welcome_screen.check_settings_availability()
+        assert self.welcome_screen.check_app_version()
+        assert self.welcome_screen.check_customer_description()
+        assert self.welcome_screen.check_main_title()
+
     """Privacy Policy checking test"""
 
     @pytest.mark.skip
@@ -40,6 +58,7 @@ class TestEnovaApp(BaseTest):
 
         with allure.step("Check that Privacy Policy page is opened"):
             assert self.settings.is_privacy_policy()
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
         with allure.step("Close Privacy Policy page"):
             self.settings.close_privacy_policy()
@@ -62,6 +81,7 @@ class TestEnovaApp(BaseTest):
 
         with allure.step("Check that metrics are displayed in chat under system answer"):
             assert self.enova_chat.is_metrics_in_chat(), "Metrics is not present in chat after"
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
         with allure.step("Check that metrics contained not empty data"):
             assert self.enova_chat.is_data_in_metrix(), "Metrics are empty, no data is in metrics"
 
@@ -84,6 +104,7 @@ class TestEnovaApp(BaseTest):
 
         with allure.step("Check that metrics are displayed in chat under system answer"):
             assert self.enova_chat.is_versions_in_chat(), "Metrics is not present in chat after"
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
         with allure.step("Check that metrics contained not empty data"):
             assert self.enova_chat.is_data_in_versions(), "Metrics are empty, no data is in metrics"
 
@@ -101,11 +122,13 @@ class TestEnovaApp(BaseTest):
 
         with allure.step("Check that login page is opened"):
             assert self.login_page.is_login_page()
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
         with allure.step("Check that 'Email' field is empty and after click 'Submit' button "
                          "messsage about invalid email is displayed"):
             self.login_page.click_send_button()
-        assert self.login_page.is_warning_red_text()
+            assert self.login_page.is_warning_red_text()
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
     """Meetings button is present in Enova chat"""
 
@@ -119,26 +142,104 @@ class TestEnovaApp(BaseTest):
             self.customers_page.open_chatmode_for_customer("Enova")
         with allure.step("Check that meeting button is present in chat"):
             assert self.enova_chat.is_meeting_button()
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
     """Create meetings: meeting creation window is opened"""
 
+    @pytest.mark.skip
     @allure.description("Opening meeting creation page")
     def test_open_create_meeting_page(self):
-        pass
-
-    @allure.description("TEST: Welcome screen overview")
-    def test_welcome_screen(self):
-        print("Test_WelcomeScreen")
-        self.welcome_screen = WelcomeScreen(self.driver)
-        assert self.welcome_screen.check_settings_availability()
-        assert self.welcome_screen.check_app_version()
-        assert self.welcome_screen.check_customer_description()
-        assert self.welcome_screen.check_main_title()
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Open 'Create meeting' page"):
+            self.meetings.open_create_meeting_page()
+        with allure.step("Check that 'Create meeting' page is opened"):
+            assert self.meetings.is_create_meeting_page(), \
+                "'Create meeting page is not opened or page header is incorrect'"
+        with allure.step("Check 'Create meeting' header text"):
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+            assert self.meetings.get_meeting_create_header_text() == "New Meeting" or self.meetings.get_meeting_create_header_text() == "Новое совещание", \
+                "Incorrect header text on 'Create meeting' page"
 
     """Create meetings: meetings name is presented"""
-    """Create meetings: Tags are presented"""
-    """Create meetings: add tag"""
+
+    @pytest.mark.skip
+    @allure.description("Check meeting name on 'Create meeting' page")
+    def test_meeting_name_on_create_meeting_page(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Open 'Create meeting' page"):
+            self.meetings.open_create_meeting_page()
+
+        with allure.step("Check that meeting name is presented on Create meeting page"):
+            assert self.meetings.is_meeting_name_on_create_meeting_page(), \
+                "Meeting name field is not presented on 'Create meeting' page "
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+        with allure.step("Check meeting name on 'Create meeting' page"):
+            # current_datetime = str(datetime.now()).split(" ")
+            # time = current_datetime[1].split(".")[0]
+            # data = current_datetime[0].split("-")
+            assert re.match(TestData.MEETING_NAME_REG, self.meetings.get_meeting_name_create_meeting_page()), \
+                "Format meeting name on Create meeting page is incorrect"
+
+    """Create meetings: Topics are presented"""
+
+    @pytest.mark.skip
+    @allure.description("Check topics on 'Create meeting' page")
+    def test_tags_on_create_meeting_page(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Open 'Create meeting' page"):
+            self.meetings.open_create_meeting_page()
+
+        with allure.step("Check that topics are presented on Create meeting page"):
+            assert self.meetings.is_topics_on_create_meeting_page(), \
+                "Topics area is not presented on 'Create meeting' page"
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+            assert len(self.meetings.get_topics_list_create_meeting_page()) > 0, \
+                "Topics are not present on 'Create meeting' page"
+
+    """Create meetings: add topic"""
+
+    @pytest.mark.skip
+    @allure.description("Add new topic on 'Create meeting' page")
+    def test_add_new_topic_on_create_meeting_page(self):
+        self.meetings = MeetingPage(self.driver)
+        new_topic_name = "New topic"
+        with allure.step("Open 'Create meeting' page"):
+            self.meetings.open_create_meeting_page()
+            topics_list = self.meetings.get_topics_list_create_meeting_page()
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+        with allure.step("Click 'Add topic' button"):
+            self.meetings.click_add_topic_button()
+        with allure.step("Set new topic name"):
+            self.meetings.set_new_topic_name(new_topic_name)
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+        with allure.step("Click 'OK' button"):
+            self.meetings.click_ok_on_new_topic_form()
+        with allure.step("Check that new topic is added"):
+            new_topic_list = self.meetings.get_topics_list_create_meeting_page()
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+            assert len(new_topic_list) == len(topics_list)+1, \
+                "Meetings list is incorrect after adding new topic"
+        with allure.step("Check that added topic is 'New topic'"):
+            assert self.meetings.get_topic_name(new_topic_list[-1]) == new_topic_name, \
+                "Name of added topic is incorrect"
+
     """Create new meeting"""
+
+    @allure.description("Create new meeting test")
+    def test_create_new_meeting(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Create new meeting with default name and without topics"):
+            self.meetings.create_new_meeting()
+
+        with allure.step("Check that meeting is created and contains name, text area and mic button"):
+            assert self.meetings.is_meeting_created(), \
+                "Meeting is not created or created incorrectly"
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+        with allure.step("Check name of created meeting"):
+            assert re.match(TestData.MEETING_NAME_REG, self.meetings.get_meeting_name()), \
+                "Format of meeting name is incorrect"
+
     """Meeting screen: meeting name"""
     """Meeting screen: edit meeting button"""
     """Meeting screen: meeting markers button"""

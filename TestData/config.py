@@ -1,4 +1,3 @@
-import time
 
 
 class TestData:
@@ -24,6 +23,8 @@ class TestData:
     ]
 
     AUDIO_FOR_DIALOGS = []
+
+    MEETING_NAME_REG = r"[a-z|A-Z]*_[0-9]{2}_[a-z|A-Z]*_[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}"
 
     # PASSWORD = "TBD"
     # REPORT_TEMPLATE_PATH = '../report_template.xlsx'

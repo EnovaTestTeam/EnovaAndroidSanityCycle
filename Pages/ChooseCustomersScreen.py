@@ -41,3 +41,9 @@ class ChooseCustomerScreen(BasePage):
         self.click_by_locator(self.CHAT_BUTTON)
         if self.is_element_by_locator(self.SKIP_TUTORIAL_BUTTON):
             self.skip_tutorial()
+
+    def open_enova_chat(self):
+        self.select_customer("Enova")
+        self.click_by_locator(self.CHAT_BUTTON)
+        if self.is_element_by_locator(self.SKIP_TUTORIAL_BUTTON):
+            self.skip_tutorial()
