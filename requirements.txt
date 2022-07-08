@@ -1,0 +1,5 @@
+allure-pytest==2.9.45
+Appium-Python-Client==2.6.0
+playsound==1.2.2
+pytest==7.1.2
+selenium==4.3.0
