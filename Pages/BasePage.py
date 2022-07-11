@@ -61,6 +61,13 @@ class BasePage:
         else:
             return False
 
+    def is_element_enabled_by_locator(self, locator):
+        element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(locator))
+        if element.get_attribute("enabled") == "true":
+            return True
+        else:
+            return False
+
     def swipe_left_by_element(self, element):
         x = element.location['x'] + element.size['width'] / 2
         y = element.location['y'] + element.size['height'] / 2

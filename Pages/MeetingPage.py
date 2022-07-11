@@ -27,6 +27,7 @@ class MeetingPage(BasePage):
     MEETING_EDIT_BUTTON = (By.ID, "com.harman.enova.beta:id/rightButton")
     MEETING_MARKERS_BUTTON = (By.ID, "com.harman.enova.beta:id/auxButton")
     MEETING_MARKERS_GROUP = (By.ID, "com.harman.enova.beta:id/markersGroup")
+    MEETING_DETAILS_BUTTON = (By.ID, "com.harman.enova.beta:id/detailsButton")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -123,3 +124,15 @@ class MeetingPage(BasePage):
 
     def is_meeting_markers_form(self):
         return self.is_element_by_locator(self.MEETING_MARKERS_GROUP)
+
+    def is_meeting_details_button(self):
+        return self.is_element_by_locator(self.MEETING_DETAILS_BUTTON)
+
+    def open_meeting_details(self):
+        self.click_by_locator(self.MEETING_DETAILS_BUTTON)
+
+    def is_meeting_details_form(self):
+        return self.is_element_by_locator(self.MEETING_MARKERS_GROUP)
+
+    def is_enabled_meeting_details_button(self):
+        return self.is_element_enabled_by_locator(self.MEETING_DETAILS_BUTTON)

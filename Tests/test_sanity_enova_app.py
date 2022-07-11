@@ -304,7 +304,24 @@ class TestEnovaApp(BaseTest):
                 "Markers for is not opened or for doesn't contain list of markers"
         allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
-    """Meeting screen: meeting statistic button"""
+    """Meeting screen: meeting details button"""
+
+    @pytest.mark.skip
+    @allure.description("Check that Details button is present for meeting and is disabled for empty meeting")
+    def test_markers_meeting_button(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Create new meeting"):
+            self.meetings.create_new_meeting()
+
+        with allure.step("Check that 'Details' button is present on Meeting page"):
+            assert self.meetings.is_meeting_details_button(), \
+                "'Details' button is not found on Meeting page"
+
+        with allure.step("Check that 'Details' button is disabled for empty meeting"):
+            assert not self.meetings.is_enabled_meeting_details_button(), \
+                "'Details' button is enabled for empty meeting"
+        allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
     """Change meeting name"""
     """Change meeting tags"""
     """Meeting recording: short audio"""
