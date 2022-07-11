@@ -154,7 +154,7 @@ class TestEnovaApp(BaseTest):
             self.meetings.open_create_meeting_page()
         with allure.step("Check that 'Create meeting' page is opened"):
             assert self.meetings.is_create_meeting_page(), \
-                "'Create meeting page is not opened or page header is incorrect'"
+                "'Create meeting' page is not opened or page header is incorrect"
         with allure.step("Check 'Create meeting' header text"):
             allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
             assert self.meetings.get_meeting_create_header_text() == "New Meeting" or self.meetings.get_meeting_create_header_text() == "Новое совещание", \
@@ -263,8 +263,48 @@ class TestEnovaApp(BaseTest):
             allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
     """Meeting screen: edit meeting button"""
+
+    @pytest.mark.skip
+    @allure.description("Check that Edit button is present for meeting and Edit window can be opened")
+    def test_edit_meeting_button(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Create new meeting"):
+            self.meetings.create_new_meeting()
+
+        with allure.step("Check that 'Edit' button is present on Meeting page"):
+            assert self.meetings.is_meeting_edit_button(), \
+                "'Edit' button is not found on Meeting page"
+
+        with allure.step("Open 'Edit meeting' page"):
+            self.meetings.open_meeting_edit_page()
+
+        with allure.step("Check that 'Edit meeting' page is opened"):
+            assert self.meetings.is_meeting_edit_page(), \
+                "'Edit meeting' page is not opened or page header is incorrect"
+        allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
     """Meeting screen: meeting markers button"""
-    """Veeting screen: meeting statistic button"""
+
+    @pytest.mark.skip
+    @allure.description("Check that Markers button is present for meeting and markers form can be opened")
+    def test_markers_meeting_button(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Create new meeting"):
+            self.meetings.create_new_meeting()
+
+        with allure.step("Check that 'Markers' button is present on Meeting page"):
+            assert self.meetings.is_meeting_markers_button(), \
+                "'Markers' button is not found on Meeting page"
+
+        with allure.step("Open markers for meeting"):
+            self.meetings.open_meeting_markers()
+
+        with allure.step("Check that markers form is opened"):
+            assert self.meetings.is_meeting_markers_form(), \
+                "Markers for is not opened or for doesn't contain list of markers"
+        allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+    """Meeting screen: meeting statistic button"""
     """Change meeting name"""
     """Change meeting tags"""
     """Meeting recording: short audio"""

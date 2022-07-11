@@ -24,6 +24,9 @@ class MeetingPage(BasePage):
     MEETING_BACK_BUTTON = (By.ID, "com.harman.enova.beta:id/closeBtn")
     MEETING_DETAILS_BUTTON = (By.ID, "com.harman.enova.beta:id/detailsButton")
     MEETING_NAME = (By.ID, "com.harman.enova.beta:id/titleText")
+    MEETING_EDIT_BUTTON = (By.ID, "com.harman.enova.beta:id/rightButton")
+    MEETING_MARKERS_BUTTON = (By.ID, "com.harman.enova.beta:id/auxButton")
+    MEETING_MARKERS_GROUP = (By.ID, "com.harman.enova.beta:id/markersGroup")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -99,3 +102,24 @@ class MeetingPage(BasePage):
 
     def get_meeting_name(self):
         return self.get_element_text_by_locator(self.MEETING_NAME)
+
+    def is_meeting_edit_button(self):
+        return self.is_element_by_locator(self.MEETING_EDIT_BUTTON)
+
+    def open_meeting_edit_page(self):
+        self.click_by_locator(self.MEETING_EDIT_BUTTON)
+
+    def is_meeting_edit_page(self):
+        if self.is_element_by_locator(self.CREATE_MEETING_HEADER) and self.get_element_text_by_locator(self.CREATE_MEETING_HEADER_TEXT) == "Update Meeting":
+            return True
+        else:
+            return False
+
+    def is_meeting_markers_button(self):
+        return self.is_element_by_locator(self.MEETING_MARKERS_BUTTON)
+
+    def open_meeting_markers(self):
+        self.click_by_locator(self.MEETING_MARKERS_BUTTON)
+
+    def is_meeting_markers_form(self):
+        return self.is_element_by_locator(self.MEETING_MARKERS_GROUP)
