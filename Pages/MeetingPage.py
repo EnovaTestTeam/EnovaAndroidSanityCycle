@@ -77,7 +77,7 @@ class MeetingPage(BasePage):
 
     def set_meeting_name(self, meeting_name):
         self.clear_element_by_locator(self.CREATE_MEETING_NAME_TEXT)
-        self.send_keys_by_locator(self.CREATE_MEETING_NAME_TEXT)
+        self.send_keys_by_locator(self.CREATE_MEETING_NAME_TEXT, meeting_name)
 
     def click_create_meeting_button(self):
         self.click_by_locator(self.CREATE_MEETING_BUTTON)

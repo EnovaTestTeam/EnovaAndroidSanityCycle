@@ -210,12 +210,12 @@ class TestEnovaApp(BaseTest):
             allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
         with allure.step("Click 'Add topic' button"):
             self.meetings.click_add_topic_button()
-        with allure.step("Set new topic name"):
+        with allure.step(f"Set new topic name: {new_topic_name}"):
             self.meetings.set_new_topic_name(new_topic_name)
             allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
         with allure.step("Click 'OK' button"):
             self.meetings.click_ok_on_new_topic_form()
-        with allure.step("Check that new topic is added"):
+        with allure.step(f"Check that new topic '{new_topic_name}' is added"):
             new_topic_list = self.meetings.get_topics_list_create_meeting_page()
             allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
             assert len(new_topic_list) == len(topics_list)+1, \
@@ -226,6 +226,7 @@ class TestEnovaApp(BaseTest):
 
     """Create new meeting"""
 
+    @pytest.mark.skip
     @allure.description("Create new meeting test")
     def test_create_new_meeting(self):
         self.meetings = MeetingPage(self.driver)
@@ -241,6 +242,26 @@ class TestEnovaApp(BaseTest):
                 "Format of meeting name is incorrect"
 
     """Meeting screen: meeting name"""
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize("meeting_name", [
+        "New meeting",
+        "Новый митинг",
+        "!@#$%$%^^",
+    ])
+    @allure.description("Create meeting with different format of names and check name")
+    def test_new_meeting_name(self, meeting_name):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step(f"Create new meeting with name: {meeting_name}"):
+            self.meetings.create_new_meeting(meeting_name)
+        with allure.step("Check that meeting is created and contains name, text area and mic button"):
+            assert self.meetings.is_meeting_created(), \
+                "Meeting is not created or created incorrectly"
+        with allure.step("Check name of created meeting"):
+            assert self.meetings.get_meeting_name() == meeting_name, \
+                f"Name of created meeting is not {meeting_name}"
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
     """Meeting screen: edit meeting button"""
     """Meeting screen: meeting markers button"""
     """Veeting screen: meeting statistic button"""
