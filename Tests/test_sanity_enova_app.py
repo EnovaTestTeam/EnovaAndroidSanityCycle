@@ -1,12 +1,9 @@
 import allure
 import pytest
 import re
-from datetime import datetime
-
 from allure_commons.types import AttachmentType
 
 from Pages.WelcomeScreen import WelcomeScreen
-from Tests.test_base import BaseTest
 from Pages.LoginPage import LoginPage
 from Pages.ChooseCustomersScreen import ChooseCustomerScreen
 from TestData.config import TestData
@@ -15,7 +12,8 @@ from Pages.EnovaChatPage import EnovaChatPage
 from Pages.MeetingPage import MeetingPage
 
 
-class TestEnovaApp(BaseTest):
+@pytest.mark.usefixtures("login")
+class TestEnovaApp:
 
     """Registering device test"""
 
@@ -323,6 +321,31 @@ class TestEnovaApp(BaseTest):
         allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
     """Change meeting name"""
+
+    @pytest.mark.skip
+    @allure.description("Changing meeting name test")
+    @pytest.mark.parametrize("new_name", [
+        "New meeting",
+        "Новый митинг",
+        "!@#$%$%^^",
+    ])
+    def test_change_meeting_name(self, new_name):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Create new meeting"):
+            self.meetings.create_new_meeting()
+        with allure.step("Open 'Edit meeting' page"):
+            self.meetings.open_meeting_edit_page()
+        with allure.step("Change meeting name"):
+            self.meetings.set_meeting_name(new_name)
+        allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+        with allure.step("Save changes in meeting"):
+            self.meetings.save_changes_in_meeting()
+
+        with allure.step("Check new meeting name"):
+            assert self.meetings.get_meeting_name() == new_name, \
+                f"Name of created meeting is not {new_name}"
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
     """Change meeting tags"""
     """Meeting recording: short audio"""
     """Meeting recording: middle audio audio"""

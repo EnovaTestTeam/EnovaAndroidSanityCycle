@@ -27,7 +27,7 @@ class MeetingPage(BasePage):
     MEETING_EDIT_BUTTON = (By.ID, "com.harman.enova.beta:id/rightButton")
     MEETING_MARKERS_BUTTON = (By.ID, "com.harman.enova.beta:id/auxButton")
     MEETING_MARKERS_GROUP = (By.ID, "com.harman.enova.beta:id/markersGroup")
-    MEETING_DETAILS_BUTTON = (By.ID, "com.harman.enova.beta:id/detailsButton")
+    #EDIT_MEETING_NAME_FIELD = (By.ID, "com.harman.enova.beta:id/detailsButton")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -136,3 +136,7 @@ class MeetingPage(BasePage):
 
     def is_enabled_meeting_details_button(self):
         return self.is_element_enabled_by_locator(self.MEETING_DETAILS_BUTTON)
+
+    def save_changes_in_meeting(self):
+        self.swipe_top()
+        self.click_create_meeting_button()
