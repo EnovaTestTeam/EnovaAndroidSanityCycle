@@ -346,7 +346,36 @@ class TestEnovaApp:
                 f"Name of created meeting is not {new_name}"
             allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
-    """Change meeting tags"""
-    """Meeting recording: short audio"""
-    """Meeting recording: middle audio audio"""
-    """Meeting recording: long audio audio"""
+    """Change meeting topics"""
+
+    @pytest.mark.skip
+    @allure.description("Changing meeting topics test")
+    def test_change_meeting_topics(self):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Create new meeting"):
+            self.meetings.create_new_meeting()
+        with allure.step("Open 'Edit meeting' page"):
+            self.meetings.open_meeting_edit_page()
+        with allure.step("Select all topics"):
+            self.meetings.select_all_topics()
+        selected_topics = self.meetings.get_names_selected_topics()
+        with allure.step("Save changes in meeting"):
+            self.meetings.save_changes_in_meeting()
+        new_topics = self.meetings.get_meeting_topics_list()
+        with allure.step("Check that topics are added in meeting"):
+            assert selected_topics == new_topics, "Topics list after editing is incorrect"
+            allure.attach(self.driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+    """Meeting recording audio"""
+
+    @allure.description("Meeting recording audio test")
+    @pytest.mark.parametrize("audio_path", [
+        "New meeting",
+        "Новый митинг",
+        "!@#$%$%^^",
+    ])
+    def test_record_meeting(self, audio_path):
+        self.meetings = MeetingPage(self.driver)
+        with allure.step("Create new meeting"):
+            self.meetings.create_new_meeting()
+

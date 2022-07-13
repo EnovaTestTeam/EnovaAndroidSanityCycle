@@ -27,7 +27,7 @@ class MeetingPage(BasePage):
     MEETING_EDIT_BUTTON = (By.ID, "com.harman.enova.beta:id/rightButton")
     MEETING_MARKERS_BUTTON = (By.ID, "com.harman.enova.beta:id/auxButton")
     MEETING_MARKERS_GROUP = (By.ID, "com.harman.enova.beta:id/markersGroup")
-    #EDIT_MEETING_NAME_FIELD = (By.ID, "com.harman.enova.beta:id/detailsButton")
+    MEETING_TOPICS_LIST = (By.ID, "com.harman.enova.beta:id/chip")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -79,6 +79,19 @@ class MeetingPage(BasePage):
         self.set_new_topic_name(topic_name)
         self.click_add_topic_button()
 
+    def select_all_topics(self):
+        topics_list = self.find_elements(self.CREATE_MEETING_TOPICS_LIST)
+        for topic in topics_list:
+            self.click_by_element(topic)
+
+    def get_names_selected_topics(self):
+        selected_topics = []
+        topics_list = self.find_elements(self.CREATE_MEETING_TOPICS_LIST)
+        for topic in topics_list:
+            if self.is_element_checked_by_element(topic):
+                selected_topics.append(self.get_element_text_by_element(topic))
+        return selected_topics
+
     def set_meeting_name(self, meeting_name):
         self.clear_element_by_locator(self.CREATE_MEETING_NAME_TEXT)
         self.send_keys_by_locator(self.CREATE_MEETING_NAME_TEXT, meeting_name)
@@ -103,6 +116,13 @@ class MeetingPage(BasePage):
 
     def get_meeting_name(self):
         return self.get_element_text_by_locator(self.MEETING_NAME)
+
+    def get_meeting_topics_list(self):
+        topics = self.find_elements(self.MEETING_TOPICS_LIST)
+        topics_names = []
+        for topic in topics:
+            topics_names.append(self.get_element_text_by_element(topic))
+        return topics_names
 
     def is_meeting_edit_button(self):
         return self.is_element_by_locator(self.MEETING_EDIT_BUTTON)
@@ -140,3 +160,4 @@ class MeetingPage(BasePage):
     def save_changes_in_meeting(self):
         self.swipe_top()
         self.click_create_meeting_button()
+
