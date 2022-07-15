@@ -20,7 +20,8 @@ class MeetingPage(BasePage):
     CREATE_MEETING_BUTTON = (By.ID, "com.harman.enova.beta:id/meetingCreateButton")
     MEETING_HEADER = (By.ID, "com.harman.enova.beta:id/meetingHeader")
     MEETING_EMPTY_SESSION_AREA = (By.ID, "com.harman.enova.beta:id/emptySessionLayout")
-    MEETING_RECORD_BUTTON = (By.ID, "com.harman.enova.beta:id/recordBtn")
+    MEETING_RECORDING_BUTTON = (By.ID, "com.harman.enova.beta:id/recordBtn")
+    MEETING_LISTENING_VIEW_BUTTON = (By.ID, "com.harman.enova.beta:id/listeningView")
     MEETING_BACK_BUTTON = (By.ID, "com.harman.enova.beta:id/closeBtn")
     MEETING_DETAILS_BUTTON = (By.ID, "com.harman.enova.beta:id/detailsButton")
     MEETING_NAME = (By.ID, "com.harman.enova.beta:id/titleText")
@@ -28,6 +29,9 @@ class MeetingPage(BasePage):
     MEETING_MARKERS_BUTTON = (By.ID, "com.harman.enova.beta:id/auxButton")
     MEETING_MARKERS_GROUP = (By.ID, "com.harman.enova.beta:id/markersGroup")
     MEETING_TOPICS_LIST = (By.ID, "com.harman.enova.beta:id/chip")
+    MEETING_RECORDING_TIME = (By.ID, "com.harman.enova.beta:id/meetingTimeView")
+    MEETING_RECORDING_ANIMATION = (By.ID, "com.harman.enova.beta:id/waveformView")
+    MEETING_TEXT = (By.ID, "com.harman.enova.beta:id/contentText")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -109,7 +113,7 @@ class MeetingPage(BasePage):
     def is_meeting_created(self):
         if self.is_element_by_locator(self.MEETING_HEADER) and \
                 self.is_element_by_locator(self.MEETING_EMPTY_SESSION_AREA) and \
-                self.is_element_by_locator(self.MEETING_RECORD_BUTTON):
+                self.is_element_by_locator(self.MEETING_RECORDING_BUTTON):
             return True
         else:
             return False
@@ -161,3 +165,78 @@ class MeetingPage(BasePage):
         self.swipe_top()
         self.click_create_meeting_button()
 
+    def start_recording_meeting(self):
+        self.click_by_locator(self.MEETING_RECORDING_BUTTON)
+
+    def is_meeting_in_listening_state(self):
+        return self.is_element_by_locator(self.MEETING_LISTENING_VIEW_BUTTON)
+
+    def stop_recording_meeting(self):
+        self.click_by_locator(self.MEETING_LISTENING_VIEW_BUTTON)
+        self.find_element(self.MEETING_RECORDING_BUTTON)
+
+    def is_meeting_recording_timer(self):
+        return self.is_element_by_locator(self.MEETING_RECORDING_TIME)
+
+    def is_meeting_recording_animation(self):
+        return self.is_element_by_locator(self.MEETING_RECORDING_ANIMATION)
+
+    def record_meeting(self, audio_path):
+        self.start_recording_meeting()
+        self.play(audio_path)
+        self.pause(2)
+        self.stop_recording_meeting()
+
+    def is_enabled_meeting_recording_button(self):
+        return self.is_element_enabled_by_locator(self.MEETING_RECORDING_BUTTON)
+
+    def is_empty_session_meeting(self):
+        return self.is_element_by_locator(self.MEETING_EMPTY_SESSION_AREA)
+
+    def is_meeting_time(self):
+        return self.is_element_by_locator(self.MEETING_RECORDING_TIME)
+
+    def get_meeting_time(self):
+        return self.get_element_text_by_locator(self.MEETING_RECORDING_TIME)
+
+    def is_meeting_text(self):
+        return self.is_element_by_locator(self.MEETING_TEXT)
+
+    def get_meeting_text(self):
+        text = []
+        elements = self.find_elements(self.MEETING_TEXT)
+        for element in elements:
+            text.append(self.get_element_text_by_element(element))
+        return text
+
+    def wer(self, r, h):
+        if not r:
+            if not h:
+                return 100.0
+            else:
+                return 0.0
+        if not h:
+            return 100.0
+
+        r = r.split(' ')
+        h = h.split(' ')
+        d = np.zeros((len(r) + 1) * (len(h) + 1), dtype=np.uint8)
+        d = d.reshape((len(r) + 1, len(h) + 1))
+
+        for i in range(len(r) + 1):
+            d[i][0] = i
+
+        for j in range(len(h) + 1):
+            d[0][j] = j
+
+        for i in range(1, len(r) + 1):
+            for j in range(1, len(h) + 1):
+                if r[i - 1] == h[j - 1]:
+                    d[i][j] = d[i - 1][j - 1]
+                else:
+                    substitution = d[i - 1][j - 1] + 1
+                    insertion = d[i][j - 1] + 1
+                    deletion = d[i - 1][j] + 1
+                    d[i][j] = min(substitution, insertion, deletion)
+
+        return d[len(r)][len(h)] / len(r) * 100
