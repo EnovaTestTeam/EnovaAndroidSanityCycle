@@ -20,6 +20,6 @@ def login(driver, server, user, protocol, language):
     login_page = LoginPage(driver)
 
     login_page.login(server, user, protocol, language)
-    #yield driver
+
 
 

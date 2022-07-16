@@ -372,22 +372,23 @@ class TestEnovaApp:
 
     #@pytest.mark.skip
     @allure.description("Meeting recording audio test")
-    @pytest.mark.parametrize("audio_path", [
-        r"C:\Users\ruvkuminov\TestsAutomation\EnovaAndroidTests\TestData\AudioData\what_time_is_it.mp3",
+    @pytest.mark.parametrize("audio_path, audio_lang", [
+        (r"C:\Users\ruvkuminov\TestsAutomation\EnovaAndroidTests\TestData\AudioData\what_time_is_it.mp3", "Russian"),
     ])
     @pytest.mark.skipif(False, reason='Git is not available')
-    def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path):
-        self.meetings = MeetingPage(driver)
-        with allure.step("Create new meeting"):
-            self.meetings.create_new_meeting()
-        with allure.step(f"Start meeting recording, play audio{audio_path} and stop meeting"):
-            self.meetings.record_meeting(audio_path)
+    def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang):
+        if language == audio_lang:
+            self.meetings = MeetingPage(driver)
+            with allure.step("Create new meeting"):
+                self.meetings.create_new_meeting()
+            with allure.step(f"Start meeting recording, play audio{audio_path} and stop meeting"):
+                self.meetings.record_meeting(audio_path)
 
-        with allure.step("Check that meeting text is presented"):
-            assert self.meetings.is_meeting_text(), "Meeting text is not presented"
+            with allure.step("Check that meeting text is presented"):
+                assert self.meetings.is_meeting_text(), "Meeting text is not presented"
 
-        with allure.step("Check that Mic button is disabled and Details button is enabled"):
-            assert self.meetings.is_enabled_meeting_details_button(), "Details button is disabled"
-            assert not self.meetings.is_enabled_meeting_recording_button(), "Mic button is enabled"
+            with allure.step("Check that Mic button is disabled and Details button is enabled"):
+                assert self.meetings.is_enabled_meeting_details_button(), "Details button is disabled"
+                assert not self.meetings.is_enabled_meeting_recording_button(), "Mic button is enabled"
 
-            #wer = self.meetings.wer()
+                #wer = self.meetings.wer()
