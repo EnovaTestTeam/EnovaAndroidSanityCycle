@@ -32,6 +32,9 @@ class MeetingPage(BasePage):
     MEETING_RECORDING_TIME = (By.ID, "com.harman.enova.beta:id/meetingTimeView")
     MEETING_RECORDING_ANIMATION = (By.ID, "com.harman.enova.beta:id/waveformView")
     MEETING_TEXT = (By.ID, "com.harman.enova.beta:id/contentText")
+    MEETING_DETAILS_LIST = (By.ID, "android:id/title")
+    MEETING_DETAILS_HEADER_TEXT = (By.ID, "com.harman.enova.beta:id/titleText")
+    MEETING_SUBTITLES_TEXT = (By.ID, "com.harman.enova.beta:id/contentText")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -209,34 +212,62 @@ class MeetingPage(BasePage):
             text.append(self.get_element_text_by_element(element))
         return text
 
-    def wer(self, r, h):
-        if not r:
-            if not h:
-                return 100.0
-            else:
-                return 0.0
-        if not h:
-            return 100.0
+    def open_meeting_detais(self):
+        self.click_by_locator(self.MEETING_DETAILS_BUTTON)
 
-        r = r.split(' ')
-        h = h.split(' ')
-        d = np.zeros((len(r) + 1) * (len(h) + 1), dtype=np.uint8)
-        d = d.reshape((len(r) + 1, len(h) + 1))
+    def get_details_list(self):
+        details = []
+        details_list = self.find_elements(self.MEETING_DETAILS_LIST)
+        for d in details_list:
+            details.append(self.get_element_text_by_element(d))
+        return details
 
-        for i in range(len(r) + 1):
-            d[i][0] = i
+    def open_meeting_subtitles(self):
+        details_list = self.find_elements(self.MEETING_DETAILS_LIST)
+        for d in details_list:
+            if self.get_element_text_by_element(d) == "Subtitles" or self.get_element_text_by_element(d) == "Субтитры":
+                self.click_by_element(d)
+                break
 
-        for j in range(len(h) + 1):
-            d[0][j] = j
+    def is_meeting_subtitles_page(self):
+        if self.get_element_text_by_locator(self.MEETING_DETAILS_HEADER_TEXT) == "Meeting Subtitles" \
+                or self.get_element_text_by_locator(self.MEETING_DETAILS_HEADER_TEXT) == "Субтитры совещания":
+            return True
+        else:
+            return False
 
-        for i in range(1, len(r) + 1):
-            for j in range(1, len(h) + 1):
-                if r[i - 1] == h[j - 1]:
-                    d[i][j] = d[i - 1][j - 1]
-                else:
-                    substitution = d[i - 1][j - 1] + 1
-                    insertion = d[i][j - 1] + 1
-                    deletion = d[i - 1][j] + 1
-                    d[i][j] = min(substitution, insertion, deletion)
+    def get_meeting_subtitles(self):
+        return self.get_element_text_by_locator(self.MEETING_SUBTITLES_TEXT)
 
-        return d[len(r)][len(h)] / len(r) * 100
+
+    # def wer(self, r, h):
+    #     if not r:
+    #         if not h:
+    #             return 100.0
+    #         else:
+    #             return 0.0
+    #     if not h:
+    #         return 100.0
+    #
+    #     r = r.split(' ')
+    #     h = h.split(' ')
+    #     d = np.zeros((len(r) + 1) * (len(h) + 1), dtype=np.uint8)
+    #     d = d.reshape((len(r) + 1, len(h) + 1))
+    #
+    #     for i in range(len(r) + 1):
+    #         d[i][0] = i
+    #
+    #     for j in range(len(h) + 1):
+    #         d[0][j] = j
+    #
+    #     for i in range(1, len(r) + 1):
+    #         for j in range(1, len(h) + 1):
+    #             if r[i - 1] == h[j - 1]:
+    #                 d[i][j] = d[i - 1][j - 1]
+    #             else:
+    #                 substitution = d[i - 1][j - 1] + 1
+    #                 insertion = d[i][j - 1] + 1
+    #                 deletion = d[i - 1][j] + 1
+    #                 d[i][j] = min(substitution, insertion, deletion)
+    #
+    #     return d[len(r)][len(h)] / len(r) * 100

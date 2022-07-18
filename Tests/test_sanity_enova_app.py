@@ -15,7 +15,7 @@ from Pages.MeetingPage import MeetingPage
 @pytest.mark.parametrize("server, user, protocol, language", [
     ("US West", "tbd@gmail.com", "WebSocket", "English"),
     #("US West", "tbd@gmail.com", "HTTPS", "English"),
-    #("US West", "tbd@gmail.com", "WebSocket", "Russian"),
+    ("US West", "tbd@gmail.com", "WebSocket", "Russian"),
     #("US West", "tbd@gmail.com", "HTTPS", "Russian"),
 ])
 class TestEnovaApp:
@@ -373,22 +373,42 @@ class TestEnovaApp:
     #@pytest.mark.skip
     @allure.description("Meeting recording audio test")
     @pytest.mark.parametrize("audio_path, audio_lang", [
-        (r"C:\Users\ruvkuminov\TestsAutomation\EnovaAndroidTests\TestData\AudioData\what_time_is_it.mp3", "Russian"),
+        (r"..\TestData\AudioData\what_time_is_it.mp3", "English"),
+        (r"..\TestData\AudioData\Norseman.wav", "Russian"),
     ])
-    @pytest.mark.skipif(False, reason='Git is not available')
     def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang):
         if language == audio_lang:
             self.meetings = MeetingPage(driver)
             with allure.step("Create new meeting"):
                 self.meetings.create_new_meeting()
-            with allure.step(f"Start meeting recording, play audio{audio_path} and stop meeting"):
+            with allure.step(f"Start meeting recording, play audio: {audio_path} and stop meeting"):
                 self.meetings.record_meeting(audio_path)
 
             with allure.step("Check that meeting text is presented"):
                 assert self.meetings.is_meeting_text(), "Meeting text is not presented"
 
+            with allure.step(f"Meeting text: {' '.join(self.meetings.get_meeting_text())}"):
+                meeting_text = self.meetings.get_meeting_text()
+
             with allure.step("Check that Mic button is disabled and Details button is enabled"):
                 assert self.meetings.is_enabled_meeting_details_button(), "Details button is disabled"
                 assert not self.meetings.is_enabled_meeting_recording_button(), "Mic button is enabled"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
                 #wer = self.meetings.wer()
+            with allure.step("Check Details menu"):
+                self.meetings.open_meeting_detais()
+            with allure.step("Check details list"):
+                assert self.meetings.get_details_list() == TestData.MEETING_DETAILS_LIST, \
+                    "meeting details menu is incorrect"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+            with allure.step("Check subtitles"):
+                self.meetings.open_meeting_subtitles()
+                assert self.meetings.is_meeting_subtitles_page(), \
+                    "Meeting subtitles page are not opened or has incorrect header"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+            with allure.step(f"Meeting text: {self.meetings.get_meeting_subtitles()}"):
+                meeting_subtitles = self.meetings.get_meeting_subtitles()
+

@@ -26,6 +26,8 @@ class TestData:
 
     MEETING_NAME_REG = r"[a-z|A-Z]*_[0-9]{2}_[a-z|A-Z]*_[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}"
 
+    MEETING_DETAILS_LIST = ["Important Notes", "Subtitles", "Meeting Analytics Report", "Meeting Minutes", "Refresh meeting details"]
+
     # PASSWORD = "TBD"
     # REPORT_TEMPLATE_PATH = '../report_template.xlsx'
     # REPORT_PATH = f'../reports/report_{time.strftime("%Y_%m_%d_%H_%M_%S")}.xlsx'
