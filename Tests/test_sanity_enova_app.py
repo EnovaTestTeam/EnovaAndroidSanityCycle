@@ -1,6 +1,7 @@
 import allure
 import pytest
 import re
+import time
 from allure_commons.types import AttachmentType
 
 from Pages.WelcomeScreen import WelcomeScreen
@@ -13,7 +14,7 @@ from Pages.MeetingPage import MeetingPage
 
 
 @pytest.mark.parametrize("server, user, protocol, language", [
-    ("US West", "tbd@gmail.com", "WebSocket", "English"),
+    #("US West", "tbd@gmail.com", "WebSocket", "English"),
     #("US West", "tbd@gmail.com", "HTTPS", "English"),
     ("US West", "tbd@gmail.com", "WebSocket", "Russian"),
     #("US West", "tbd@gmail.com", "HTTPS", "Russian"),
@@ -373,8 +374,9 @@ class TestEnovaApp:
     #@pytest.mark.skip
     @allure.description("Meeting recording audio test")
     @pytest.mark.parametrize("audio_path, audio_lang", [
-        (r"..\TestData\AudioData\what_time_is_it.mp3", "English"),
-        (r"..\TestData\AudioData\Norseman.wav", "Russian"),
+        #(r"..\TestData\AudioData\what_time_is_it.mp3", "English"),
+        #(r"..\TestData\AudioData\Norseman.wav", "Russian"),
+        (r"..\TestData\AudioData\test_in_google.mp3", "Russian"),
     ])
     def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang):
         if language == audio_lang:
@@ -382,20 +384,19 @@ class TestEnovaApp:
             with allure.step("Create new meeting"):
                 self.meetings.create_new_meeting()
             with allure.step(f"Start meeting recording, play audio: {audio_path} and stop meeting"):
-                self.meetings.record_meeting(audio_path)
+                recording_time = self.meetings.record_meeting(audio_path)
 
             with allure.step("Check that meeting text is presented"):
                 assert self.meetings.is_meeting_text(), "Meeting text is not presented"
-
-            with allure.step(f"Meeting text: {' '.join(self.meetings.get_meeting_text())}"):
-                meeting_text = self.meetings.get_meeting_text()
+            meeting_text = self.meetings.get_meeting_text()
+            with allure.step(f"Meeting text: {' '.join(meeting_text)}"):
+                pass
 
             with allure.step("Check that Mic button is disabled and Details button is enabled"):
                 assert self.meetings.is_enabled_meeting_details_button(), "Details button is disabled"
                 assert not self.meetings.is_enabled_meeting_recording_button(), "Mic button is enabled"
                 allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
-                #wer = self.meetings.wer()
             with allure.step("Check Details menu"):
                 self.meetings.open_meeting_detais()
             with allure.step("Check details list"):
@@ -411,4 +412,17 @@ class TestEnovaApp:
 
             with allure.step(f"Meeting text: {self.meetings.get_meeting_subtitles()}"):
                 meeting_subtitles = self.meetings.get_meeting_subtitles()
+
+            with allure.step("Compare subtitles and text of meeting"):
+                assert " ".join(meeting_text) == self.meetings.pars_subtitles(meeting_subtitles), \
+                    "Meeting text and subtitles are not the same"
+            self.meetings.back_to_meeting_from_details()
+
+            with allure.step("Check meeting time"):
+                time_in_app = self.meetings.get_meeting_recording_time()
+                time_in_app = time_in_app.split(":")
+                t = int(time_in_app[0]) * 60 * 60 + int(time_in_app[1]) * 60 + int(time_in_app[2])
+                assert (t <= recording_time <= t+3), "Meeting time is incorrect"
+
+            # wer = self.meetings.wer()
 

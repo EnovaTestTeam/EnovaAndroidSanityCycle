@@ -1,3 +1,4 @@
+import time
 from selenium.webdriver.common.by import By
 from Pages.BasePage import BasePage
 from Pages.ChooseCustomersScreen import ChooseCustomerScreen
@@ -35,6 +36,7 @@ class MeetingPage(BasePage):
     MEETING_DETAILS_LIST = (By.ID, "android:id/title")
     MEETING_DETAILS_HEADER_TEXT = (By.ID, "com.harman.enova.beta:id/titleText")
     MEETING_SUBTITLES_TEXT = (By.ID, "com.harman.enova.beta:id/contentText")
+    BACK_BUTTON_FOR_DETAILS = (By.ID, "com.harman.enova.beta:id/backButton")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -185,10 +187,14 @@ class MeetingPage(BasePage):
         return self.is_element_by_locator(self.MEETING_RECORDING_ANIMATION)
 
     def record_meeting(self, audio_path):
+        start_time = time.time()
         self.start_recording_meeting()
         self.play(audio_path)
         self.pause(2)
+        recording_time = time.time() - start_time
         self.stop_recording_meeting()
+        return recording_time
+
 
     def is_enabled_meeting_recording_button(self):
         return self.is_element_enabled_by_locator(self.MEETING_RECORDING_BUTTON)
@@ -207,9 +213,17 @@ class MeetingPage(BasePage):
 
     def get_meeting_text(self):
         text = []
-        elements = self.find_elements(self.MEETING_TEXT)
-        for element in elements:
-            text.append(self.get_element_text_by_element(element))
+        elements = []
+        flag = True
+        while flag:
+            flag = False
+            temp = self.find_elements(self.MEETING_TEXT)
+            for element in temp:
+                if element not in elements:
+                    flag = True
+                    elements.append(element)
+                    text.append(self.get_element_text_by_element(element))
+            self.swipe_meeting()
         return text
 
     def open_meeting_detais(self):
@@ -239,6 +253,19 @@ class MeetingPage(BasePage):
     def get_meeting_subtitles(self):
         return self.get_element_text_by_locator(self.MEETING_SUBTITLES_TEXT)
 
+    def pars_subtitles(self, text):
+        text = text.split('\n')
+        temp = []
+        for s in text:
+            if len(s) > 1 and ("[" in s or "]" in s):
+                temp.append(s.split("]")[-1])
+        return " ".join(temp)
+
+    def get_meeting_recording_time(self):
+        return self.get_element_text_by_locator(self.MEETING_RECORDING_TIME)
+
+    def back_to_meeting_from_details(self):
+        self.click_by_locator(self.BACK_BUTTON_FOR_DETAILS)
 
     # def wer(self, r, h):
     #     if not r:
