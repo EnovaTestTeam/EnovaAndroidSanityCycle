@@ -1,4 +1,6 @@
 import time
+from numpy import zeros, uint8
+
 from selenium.webdriver.common.by import By
 from Pages.BasePage import BasePage
 from Pages.ChooseCustomersScreen import ChooseCustomerScreen
@@ -267,34 +269,34 @@ class MeetingPage(BasePage):
     def back_to_meeting_from_details(self):
         self.click_by_locator(self.BACK_BUTTON_FOR_DETAILS)
 
-    # def wer(self, r, h):
-    #     if not r:
-    #         if not h:
-    #             return 100.0
-    #         else:
-    #             return 0.0
-    #     if not h:
-    #         return 100.0
-    #
-    #     r = r.split(' ')
-    #     h = h.split(' ')
-    #     d = np.zeros((len(r) + 1) * (len(h) + 1), dtype=np.uint8)
-    #     d = d.reshape((len(r) + 1, len(h) + 1))
-    #
-    #     for i in range(len(r) + 1):
-    #         d[i][0] = i
-    #
-    #     for j in range(len(h) + 1):
-    #         d[0][j] = j
-    #
-    #     for i in range(1, len(r) + 1):
-    #         for j in range(1, len(h) + 1):
-    #             if r[i - 1] == h[j - 1]:
-    #                 d[i][j] = d[i - 1][j - 1]
-    #             else:
-    #                 substitution = d[i - 1][j - 1] + 1
-    #                 insertion = d[i][j - 1] + 1
-    #                 deletion = d[i - 1][j] + 1
-    #                 d[i][j] = min(substitution, insertion, deletion)
-    #
-    #     return d[len(r)][len(h)] / len(r) * 100
+    def wer(self, r, h):
+        if not r:
+            if not h:
+                return 100.0
+            else:
+                return 0.0
+        if not h:
+            return 100.0
+
+        r = r.split(' ')
+        h = h.split(' ')
+        d = zeros((len(r) + 1) * (len(h) + 1), dtype=uint8)
+        d = d.reshape((len(r) + 1, len(h) + 1))
+
+        for i in range(len(r) + 1):
+            d[i][0] = i
+
+        for j in range(len(h) + 1):
+            d[0][j] = j
+
+        for i in range(1, len(r) + 1):
+            for j in range(1, len(h) + 1):
+                if r[i - 1] == h[j - 1]:
+                    d[i][j] = d[i - 1][j - 1]
+                else:
+                    substitution = d[i - 1][j - 1] + 1
+                    insertion = d[i][j - 1] + 1
+                    deletion = d[i - 1][j] + 1
+                    d[i][j] = min(substitution, insertion, deletion)
+
+        return d[len(r)][len(h)] / len(r) * 100

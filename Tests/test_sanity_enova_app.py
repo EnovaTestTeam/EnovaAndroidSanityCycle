@@ -14,7 +14,7 @@ from Pages.MeetingPage import MeetingPage
 
 
 @pytest.mark.parametrize("server, user, protocol, language", [
-    #("US West", "tbd@gmail.com", "WebSocket", "English"),
+    ("US West", "tbd@gmail.com", "WebSocket", "English"),
     #("US West", "tbd@gmail.com", "HTTPS", "English"),
     ("US West", "tbd@gmail.com", "WebSocket", "Russian"),
     #("US West", "tbd@gmail.com", "HTTPS", "Russian"),
@@ -373,12 +373,12 @@ class TestEnovaApp:
 
     #@pytest.mark.skip
     @allure.description("Meeting recording audio test")
-    @pytest.mark.parametrize("audio_path, audio_lang", [
-        #(r"..\TestData\AudioData\what_time_is_it.mp3", "English"),
-        #(r"..\TestData\AudioData\Norseman.wav", "Russian"),
-        (r"..\TestData\AudioData\test_in_google.mp3", "Russian"),
+    @pytest.mark.parametrize("audio_path, audio_lang, expected_text_path", [
+        ("..\\TestData\\AudioData\\what_time_is_it.mp3", "English", "..\\TestData\\AudioData\\what_time_is_it.txt"),
+        #("..\\TestData\\AudioData\\add_hoc_testing.mp3", "Russian", "..\\TestData\\AudioData\\add_hoc_testing.txt"),
+        ("..\\TestData\\AudioData\\test_in_google.mp3", "Russian", "..\\TestData\\AudioData\\test_in_google.txt"),
     ])
-    def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang):
+    def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang, expected_text_path):
         if language == audio_lang:
             self.meetings = MeetingPage(driver)
             with allure.step("Create new meeting"):
@@ -410,8 +410,9 @@ class TestEnovaApp:
                     "Meeting subtitles page are not opened or has incorrect header"
                 allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
-            with allure.step(f"Meeting text: {self.meetings.get_meeting_subtitles()}"):
-                meeting_subtitles = self.meetings.get_meeting_subtitles()
+            meeting_subtitles = self.meetings.get_meeting_subtitles()
+            with allure.step(f"Meeting subtitles: {meeting_subtitles}"):
+                pass
 
             with allure.step("Compare subtitles and text of meeting"):
                 assert " ".join(meeting_text) == self.meetings.pars_subtitles(meeting_subtitles), \
@@ -424,5 +425,14 @@ class TestEnovaApp:
                 t = int(time_in_app[0]) * 60 * 60 + int(time_in_app[1]) * 60 + int(time_in_app[2])
                 assert (t <= recording_time <= t+3), "Meeting time is incorrect"
 
-            # wer = self.meetings.wer()
+            with open(expected_text_path) as f:
+                expected_text = f.read()
+            wer = self.meetings.wer(meeting_text, expected_text)
+            with allure.step(f"Meeting WER: {wer}"):
+                pass
 
+
+
+        else:
+            with allure.step(f"Test is skipped, because customer language is {language}, but audio language is {audio_lang}"):
+                pass
