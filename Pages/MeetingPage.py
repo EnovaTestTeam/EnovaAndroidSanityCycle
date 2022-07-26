@@ -1,3 +1,6 @@
+import time
+from numpy import zeros, uint8
+
 from selenium.webdriver.common.by import By
 from Pages.BasePage import BasePage
 from Pages.ChooseCustomersScreen import ChooseCustomerScreen
@@ -32,6 +35,10 @@ class MeetingPage(BasePage):
     MEETING_RECORDING_TIME = (By.ID, "com.harman.enova.beta:id/meetingTimeView")
     MEETING_RECORDING_ANIMATION = (By.ID, "com.harman.enova.beta:id/waveformView")
     MEETING_TEXT = (By.ID, "com.harman.enova.beta:id/contentText")
+    MEETING_DETAILS_LIST = (By.ID, "android:id/title")
+    MEETING_DETAILS_HEADER_TEXT = (By.ID, "com.harman.enova.beta:id/titleText")
+    MEETING_SUBTITLES_TEXT = (By.ID, "com.harman.enova.beta:id/contentText")
+    BACK_BUTTON_FOR_DETAILS = (By.ID, "com.harman.enova.beta:id/backButton")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -182,10 +189,14 @@ class MeetingPage(BasePage):
         return self.is_element_by_locator(self.MEETING_RECORDING_ANIMATION)
 
     def record_meeting(self, audio_path):
+        start_time = time.time()
         self.start_recording_meeting()
         self.play(audio_path)
         self.pause(2)
+        recording_time = time.time() - start_time
         self.stop_recording_meeting()
+        return recording_time
+
 
     def is_enabled_meeting_recording_button(self):
         return self.is_element_enabled_by_locator(self.MEETING_RECORDING_BUTTON)
@@ -204,10 +215,59 @@ class MeetingPage(BasePage):
 
     def get_meeting_text(self):
         text = []
-        elements = self.find_elements(self.MEETING_TEXT)
-        for element in elements:
-            text.append(self.get_element_text_by_element(element))
+        elements = []
+        flag = True
+        while flag:
+            flag = False
+            temp = self.find_elements(self.MEETING_TEXT)
+            for element in temp:
+                if element not in elements:
+                    flag = True
+                    elements.append(element)
+                    text.append(self.get_element_text_by_element(element))
+            self.swipe_meeting()
         return text
+
+    def open_meeting_detais(self):
+        self.click_by_locator(self.MEETING_DETAILS_BUTTON)
+
+    def get_details_list(self):
+        details = []
+        details_list = self.find_elements(self.MEETING_DETAILS_LIST)
+        for d in details_list:
+            details.append(self.get_element_text_by_element(d))
+        return details
+
+    def open_meeting_subtitles(self):
+        details_list = self.find_elements(self.MEETING_DETAILS_LIST)
+        for d in details_list:
+            if self.get_element_text_by_element(d) == "Subtitles" or self.get_element_text_by_element(d) == "Субтитры":
+                self.click_by_element(d)
+                break
+
+    def is_meeting_subtitles_page(self):
+        if self.get_element_text_by_locator(self.MEETING_DETAILS_HEADER_TEXT) == "Meeting Subtitles" \
+                or self.get_element_text_by_locator(self.MEETING_DETAILS_HEADER_TEXT) == "Субтитры совещания":
+            return True
+        else:
+            return False
+
+    def get_meeting_subtitles(self):
+        return self.get_element_text_by_locator(self.MEETING_SUBTITLES_TEXT)
+
+    def pars_subtitles(self, text):
+        text = text.split('\n')
+        temp = []
+        for s in text:
+            if len(s) > 1 and ("[" in s or "]" in s):
+                temp.append(s.split("]")[-1])
+        return " ".join(temp)
+
+    def get_meeting_recording_time(self):
+        return self.get_element_text_by_locator(self.MEETING_RECORDING_TIME)
+
+    def back_to_meeting_from_details(self):
+        self.click_by_locator(self.BACK_BUTTON_FOR_DETAILS)
 
     def wer(self, r, h):
         if not r:
@@ -220,7 +280,7 @@ class MeetingPage(BasePage):
 
         r = r.split(' ')
         h = h.split(' ')
-        d = np.zeros((len(r) + 1) * (len(h) + 1), dtype=np.uint8)
+        d = zeros((len(r) + 1) * (len(h) + 1), dtype=uint8)
         d = d.reshape((len(r) + 1, len(h) + 1))
 
         for i in range(len(r) + 1):

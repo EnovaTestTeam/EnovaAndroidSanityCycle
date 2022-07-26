@@ -81,8 +81,12 @@ class BasePage:
     def swipe_top(self):
         x = self.driver.get_window_size()["width"] / 2
         y = self.driver.get_window_size()["height"] - 50
-        print(y)
         self.driver.swipe(x, y, x, 50, 400)
+
+    def swipe_meeting(self):
+        x = self.driver.get_window_size()["width"] / 2
+        y = self.driver.get_window_size()["height"] - 600
+        self.driver.swipe(x, y, x, 300, 400)
 
     def pause(self, seconds):
         time.sleep(seconds)

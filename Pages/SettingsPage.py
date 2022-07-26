@@ -25,6 +25,7 @@ class SettingsInApp(BasePage):
     SHOW_VERSIONS_SWITCH = (By.ID, "com.harman.enova.beta:id/showComponentVersionsSwitch")
     MAX_AUDIO_LENGTH = (By.ID, "com.harman.enova.beta:id/maxAudioLengthTitle")
     EXPORT_METRICS = (By.ID, "com.harman.enova.beta:id/exportMetrics")
+    WUW_SWITCH = (By.ID, "com.harman.enova.beta:id/wakeupWorkSwitch")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -139,3 +140,25 @@ class SettingsInApp(BasePage):
         if self.is_element_checked_by_locator(self.SHOW_VERSIONS_SWITCH):
             self.click_by_locator(self.SHOW_VERSIONS_SWITCH)
         self.return_to_customer_screen()
+
+    def wuw_switch_on(self):
+        self.open_common_settings()
+        self.scroll_common_settings()
+        if not self.is_element_checked_by_locator(self.WUW_SWITCH):
+            self.click_by_locator(self.WUW_SWITCH)
+        self.return_to_customer_screen()
+
+    def wuw_switch_off(self):
+        self.open_common_settings()
+        self.scroll_common_settings()
+        if self.is_element_checked_by_locator(self.WUW_SWITCH):
+            self.click_by_locator(self.WUW_SWITCH)
+        self.return_to_customer_screen()
+
+    def is_wuw_switched_on(self):
+        self.open_common_settings()
+        self.scroll_common_settings()
+        flag = self.is_element_checked_by_locator(self.WUW_SWITCH)
+        self.return_to_customer_screen()
+        return flag
+

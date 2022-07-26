@@ -1,6 +1,7 @@
 import allure
 import pytest
 import re
+import time
 from allure_commons.types import AttachmentType
 
 from Pages.WelcomeScreen import WelcomeScreen
@@ -107,6 +108,66 @@ class TestEnovaApp:
             allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
         with allure.step("Check that metrics contained not empty data"):
             assert self.enova_chat.is_data_in_versions(), "Metrics are empty, no data is in metrics"
+
+    """Wake up word state in Settings by default"""
+
+    @pytest.mark.skip
+    @allure.title("Wake up word settings by default")
+    def test_wuw_settings_default(self, driver, login, server, user, protocol, language):
+        self.settings = SettingsInApp(driver)
+        self.customers_page = ChooseCustomerScreen(driver)
+        self.enova_chat = EnovaChatPage(driver)
+
+        with allure.step("Open settings and check that wake up word is enabled by default"):
+            assert self.settings.is_wuw_switched_on(), "Wake up word is disabled by default"
+
+        with allure.step("Open chat for Enova customer"):
+            self.customers_page.open_chatmode_for_customer("Enova")
+        with allure.step("Check that 'Hey Nova' text is presented on screen"):
+            assert self.enova_chat.is_wuw_text(), "WuW text is not presented on the screen"
+            assert self.enova_chat.get_wuw_text() == 'Say "Hey Nova" or press\nmic button and ask a question' or self.enova_chat.get_wuw_text() == 'Скажите "Hey Nova" или нажмите\nкнопку микрофона и задайте вопрос', \
+                "WuW text is not presented on the screen"
+            allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+    """Ware up Word enabled test"""
+
+    @pytest.mark.skip
+    @allure.title("Wake up word enabled test")
+    def test_wuw_enabled(self, driver, login, server, user, protocol, language):
+        self.settings = SettingsInApp(driver)
+        self.customers_page = ChooseCustomerScreen(driver)
+        self.enova_chat = EnovaChatPage(driver)
+
+        with allure.step("Switch on 'Wake up Word' option in Settings"):
+            self.settings.wuw_switch_on()
+        with allure.step("Open chat for Enova customer"):
+            self.customers_page.open_chatmode_for_customer("Enova")
+        with allure.step("Say 'Hey Nova' in chat"):
+            self.enova_chat.say_in_enova_chat(TestData.AUDIO_FOR_SINGLE_INTENTS[1][0])
+
+        with allure.step("Check that listening mode is on"):
+            assert self.enova_chat.is_listening_mode_on(), "Listening mode is off, Mic button is displayed"
+            allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+    """Ware up Word disabled test"""
+
+    @pytest.mark.skip
+    @allure.title("Wake up word disabled test")
+    def test_wuw_disabled(self, driver, login, server, user, protocol, language):
+        self.settings = SettingsInApp(driver)
+        self.customers_page = ChooseCustomerScreen(driver)
+        self.enova_chat = EnovaChatPage(driver)
+
+        with allure.step("Switch off 'Wake up Word' option in Settings"):
+            self.settings.wuw_switch_off()
+        with allure.step("Open chat for Enova customer"):
+            self.customers_page.open_chatmode_for_customer("Enova")
+        with allure.step("Say 'Hey Nova' in chat"):
+            self.enova_chat.say_in_enova_chat(TestData.AUDIO_FOR_SINGLE_INTENTS[1][0])
+            self.enova_chat.pause(6)
+        with allure.step("Check that listening mode is off"):
+            assert self.enova_chat.is_listening_mode_off(), "Listening mode is on, but WuW is disabled"
+            allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
     """Unregistering device test"""
 
@@ -370,25 +431,67 @@ class TestEnovaApp:
 
     """Meeting recording audio"""
 
-    #@pytest.mark.skip
+    @pytest.mark.skip
     @allure.description("Meeting recording audio test")
-    @pytest.mark.parametrize("audio_path, audio_lang", [
-        (r"C:\Users\ruvkuminov\TestsAutomation\EnovaAndroidTests\TestData\AudioData\what_time_is_it.mp3", "Russian"),
+    @pytest.mark.parametrize("audio_path, audio_lang, expected_text_path", [
+        ("..\\TestData\\AudioData\\what_time_is_it.mp3", "English", "..\\TestData\\AudioData\\what_time_is_it.txt"),
+        ("..\\TestData\\AudioData\\add_hoc_testing.mp3", "English", "..\\TestData\\AudioData\\add_hoc_testing.txt"),
+        ("..\\TestData\\AudioData\\test_in_google.mp3", "Russian", "..\\TestData\\AudioData\\test_in_google.txt"),
     ])
-    @pytest.mark.skipif(False, reason='Git is not available')
-    def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang):
+    def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang, expected_text_path):
         if language == audio_lang:
             self.meetings = MeetingPage(driver)
             with allure.step("Create new meeting"):
                 self.meetings.create_new_meeting()
-            with allure.step(f"Start meeting recording, play audio{audio_path} and stop meeting"):
-                self.meetings.record_meeting(audio_path)
+            with allure.step(f"Start meeting recording, play audio: {audio_path} and stop meeting"):
+                recording_time = self.meetings.record_meeting(audio_path)
 
             with allure.step("Check that meeting text is presented"):
                 assert self.meetings.is_meeting_text(), "Meeting text is not presented"
+            meeting_text = self.meetings.get_meeting_text()
+            with allure.step(f"Meeting text: {' '.join(meeting_text)}"):
+                pass
 
             with allure.step("Check that Mic button is disabled and Details button is enabled"):
                 assert self.meetings.is_enabled_meeting_details_button(), "Details button is disabled"
                 assert not self.meetings.is_enabled_meeting_recording_button(), "Mic button is enabled"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
-                #wer = self.meetings.wer()
+            with allure.step("Check Details menu"):
+                self.meetings.open_meeting_detais()
+            with allure.step("Check details list"):
+                assert self.meetings.get_details_list() == TestData.MEETING_DETAILS_LIST, \
+                    "meeting details menu is incorrect"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+            with allure.step("Check subtitles"):
+                self.meetings.open_meeting_subtitles()
+                assert self.meetings.is_meeting_subtitles_page(), \
+                    "Meeting subtitles page are not opened or has incorrect header"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+            meeting_subtitles = self.meetings.get_meeting_subtitles()
+            with allure.step(f"Meeting subtitles: {meeting_subtitles}"):
+                pass
+
+            with allure.step("Compare subtitles and text of meeting"):
+                assert " ".join(meeting_text) == self.meetings.pars_subtitles(meeting_subtitles), \
+                    "Meeting text and subtitles are not the same"
+            self.meetings.back_to_meeting_from_details()
+
+            with allure.step("Check meeting time"):
+                time_in_app = self.meetings.get_meeting_recording_time()
+                time_in_app = time_in_app.split(":")
+                t = int(time_in_app[0]) * 60 * 60 + int(time_in_app[1]) * 60 + int(time_in_app[2])
+                assert (t <= recording_time <= t+4), "Meeting time is incorrect"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
+            with open(expected_text_path) as f:
+                expected_text = f.read()
+            wer = self.meetings.wer(' '.join(meeting_text), expected_text)
+            with allure.step(f"Meeting WER: {wer}"):
+                pass
+
+        else:
+            with allure.step(f"Test is skipped, because customer language is {language}, but audio language is {audio_lang}"):
+                pass

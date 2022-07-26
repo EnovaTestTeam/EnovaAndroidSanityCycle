@@ -14,6 +14,7 @@ class EnovaChatPage(BasePage):
     VERSIONS = (By.ID, "com.harman.enova.beta:id/componentVersionsLayout")
     VERSIONS_TEXT = (By.ID, "com.harman.enova.beta:id/versionTextView")
     MEETING_BUTTON = (By.ID, "com.harman.enova.beta:id/meetingButton")
+    WUW_TEXT = (By.ID, "com.harman.enova.beta:id/welcome_message")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -96,6 +97,10 @@ class EnovaChatPage(BasePage):
         self.play(audio_path)
         self.is_listening_mode_off()
 
+    def say_in_enova_chat(self, audio_path):
+        if self.is_listening_mode_off():
+            self.play(audio_path)
+
     def get_answer_from_chat(self):
         pass
 
@@ -104,3 +109,9 @@ class EnovaChatPage(BasePage):
 
     def is_meeting_button(self):
         return self.is_element_by_locator(self.MEETING_BUTTON)
+
+    def is_wuw_text(self):
+        return self.is_element_by_locator(self.WUW_TEXT)
+
+    def get_wuw_text(self):
+        return self.get_element_text_by_locator(self.WUW_TEXT)
