@@ -21,6 +21,7 @@ class EnovaChatPage(BasePage):
     ANSWER = (By.ID, "com.harman.enova.beta:id/responseLayout")
     ANSWER_TEXT = (By.ID, "com.harman.enova.beta:id/responseTextView")
     IMAGE_CONTENT = (By.ID, "com.harman.enova.beta:id/contentImageView")
+    TEXT_CONTENT = (By.CLASS_NAME, "android.view.View")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -137,5 +138,11 @@ class EnovaChatPage(BasePage):
 
     def is_image_content(self):
         return self.is_element_by_locator(self.IMAGE_CONTENT)
+
+    def is_text_content(self):
+        return self.is_element_by_locator(self.TEXT_CONTENT)
+
+    def get_text_from_text_content(self):
+        return self.get_element_text_by_locator(self.TEXT_CONTENT)
 
 

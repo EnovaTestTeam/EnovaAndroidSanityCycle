@@ -215,7 +215,8 @@ class TestEnovaApp:
     @pytest.mark.parametrize("audio_path, audio_lang", [
         ("..\\TestData\\AudioData\\image_content_en.mp3", "English"),
         ("..\\TestData\\AudioData\\image_content_ru.mp3", "Russian"),
-        ("..\\TestData\\AudioData\\image_url_content_ru.mp3", "English"),
+        ("..\\TestData\\AudioData\\image_url_content_en.mp3", "English"),
+        ("..\\TestData\\AudioData\\image_secure_url_content_en.mp3", "English"),
     ])
     @allure.title("Test image content in Enova chat")
     def test_image_content_enova_chat(self, driver, login, server, user, protocol, language, audio_path, audio_lang, mode_title):
@@ -232,6 +233,29 @@ class TestEnovaApp:
         else:
             with allure.step(f"Test is skipped, because customer language is {language}, but audio language is {audio_lang}"):
                 pass
+
+    """Test text content in Enova chat"""
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize("mode_title", [
+        "Default stream_audio",
+        "Default put_audio",
+    ])
+    @pytest.mark.parametrize("audio_path, expected_text", [
+        ("..\\TestData\\AudioData\\text_content_en.mp3", "text for testing"),
+    ])
+    @allure.title("Test text content in Enova chat")
+    def test_text_content_enova_chat(self, driver, login, server, user, protocol, language, audio_path, expected_text, mode_title):
+        self.enova_chat = EnovaChatPage(driver)
+        self.enova_actions = EnovaActions(driver)
+
+        with allure.step(f"Ask question from intent with text content and check that text in answer is displayed in chat. Mode is {mode_title}"):
+            self.enova_actions.make_request_enova_chat(audio_path, mode_title)
+
+        with allure.step("Check that text content is displayed in answer"):
+            assert self.enova_chat.is_text_content(), "Text is not displayed in answer"
+            assert self.enova_chat.get_text_from_text_content() == expected_text
+            allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
     """Unregistering device test"""
 
