@@ -4,6 +4,7 @@ import re
 import time
 from allure_commons.types import AttachmentType
 
+from Actions.actions_enova_customer import EnovaActions
 from Pages.WelcomeScreen import WelcomeScreen
 from Pages.LoginPage import LoginPage
 from Pages.ChooseCustomersScreen import ChooseCustomerScreen
@@ -169,6 +170,93 @@ class TestEnovaApp:
             assert self.enova_chat.is_listening_mode_off(), "Listening mode is on, but WuW is disabled"
             allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
 
+    """Enova chat test with any modes"""
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize("mode_title", [
+        "Default stream_audio",
+        "Default put_audio",
+    ])
+    @pytest.mark.parametrize("audio_path, audio_lang, expected_answer", [
+        ("..\\TestData\\AudioData\\tell_me_about_you_en.mp3", "English", "Hello! I'm autotest skill"),
+        ("..\\TestData\\AudioData\\tell_me_about_you_ru.mp3", "Russian", "Привет! Я автотест скилл"),
+    ])
+    @allure.title("Enova chat test")
+    def test_enova_chat(self, driver, login, server, user, protocol, language, mode_title, audio_path, audio_lang, expected_answer):
+        if language == audio_lang:
+            self.settings = SettingsInApp(driver)
+            self.customers_page = ChooseCustomerScreen(driver)
+            self.enova_chat = EnovaChatPage(driver)
+
+            with allure.step("Open chat for Enova customer"):
+                self.customers_page.open_chatmode_for_customer("Enova")
+            with allure.step(f"Switch to {mode_title} mode"):
+                self.enova_chat.select_mode(mode_title)
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+                self.enova_chat.pause(1)
+            with allure.step("Make request in chat"):
+                self.enova_chat.send_question_in_chat_not_dialog(audio_path)
+            with allure.step("Check that answer is displayed in chat"):
+                assert self.enova_chat.is_answer_in_chat(), "Answer is not displayed in chat"
+            with allure.step("Check that answer is correct"):
+                assert self.enova_chat.get_answer_from_chat() == expected_answer, "Answer is not an expected answer"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+        else:
+            with allure.step(f"Test is skipped, because customer language is {language}, but audio language is {audio_lang}"):
+                pass
+
+    """Test image content in Enova chat"""
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize("mode_title", [
+        "Default stream_audio",
+        "Default put_audio",
+    ])
+    @pytest.mark.parametrize("audio_path, audio_lang", [
+        ("..\\TestData\\AudioData\\image_content_en.mp3", "English"),
+        ("..\\TestData\\AudioData\\image_content_ru.mp3", "Russian"),
+        ("..\\TestData\\AudioData\\image_url_content_en.mp3", "English"),
+        ("..\\TestData\\AudioData\\image_secure_url_content_en.mp3", "English"),
+    ])
+    @allure.title("Test image content in Enova chat")
+    def test_image_content_enova_chat(self, driver, login, server, user, protocol, language, audio_path, audio_lang, mode_title):
+        if language == audio_lang:
+            self.enova_chat = EnovaChatPage(driver)
+            self.enova_actions = EnovaActions(driver)
+
+            with allure.step(f"Ask question from intent with image content and check that image in answer is displayed in chat. Mode is {mode_title}"):
+                self.enova_actions.make_request_enova_chat(audio_path, mode_title)
+
+            with allure.step("Check that image content is displayed in answer"):
+                assert self.enova_chat.is_image_content(), "Image is not displayed in answer"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+        else:
+            with allure.step(f"Test is skipped, because customer language is {language}, but audio language is {audio_lang}"):
+                pass
+
+    """Test text content in Enova chat"""
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize("mode_title", [
+        "Default stream_audio",
+        "Default put_audio",
+    ])
+    @pytest.mark.parametrize("audio_path, expected_text", [
+        ("..\\TestData\\AudioData\\text_content_en.mp3", "text for testing"),
+    ])
+    @allure.title("Test text content in Enova chat")
+    def test_text_content_enova_chat(self, driver, login, server, user, protocol, language, audio_path, expected_text, mode_title):
+        self.enova_chat = EnovaChatPage(driver)
+        self.enova_actions = EnovaActions(driver)
+
+        with allure.step(f"Ask question from intent with text content and check that text in answer is displayed in chat. Mode is {mode_title}"):
+            self.enova_actions.make_request_enova_chat(audio_path, mode_title)
+
+        with allure.step("Check that text content is displayed in answer"):
+            assert self.enova_chat.is_text_content(), "Text is not displayed in answer"
+            assert self.enova_chat.get_text_from_text_content() == expected_text
+            allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
     """Unregistering device test"""
 
     @pytest.mark.skip
@@ -190,6 +278,7 @@ class TestEnovaApp:
             self.login_page.click_send_button()
             assert self.login_page.is_warning_red_text()
             allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+
 
     """Meetings button is present in Enova chat"""
 

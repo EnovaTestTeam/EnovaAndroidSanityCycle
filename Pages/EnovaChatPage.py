@@ -15,6 +15,13 @@ class EnovaChatPage(BasePage):
     VERSIONS_TEXT = (By.ID, "com.harman.enova.beta:id/versionTextView")
     MEETING_BUTTON = (By.ID, "com.harman.enova.beta:id/meetingButton")
     WUW_TEXT = (By.ID, "com.harman.enova.beta:id/welcome_message")
+    MENU_BUTTON = (By.ID, "com.harman.enova.beta:id/menuButton")
+    MENU_LIST = (By.ID, "com.harman.enova.beta:id/title")
+    MODES_LIST = (By.ID, "com.harman.enova.beta:id/modeName")
+    ANSWER = (By.ID, "com.harman.enova.beta:id/responseLayout")
+    ANSWER_TEXT = (By.ID, "com.harman.enova.beta:id/responseTextView")
+    IMAGE_CONTENT = (By.ID, "com.harman.enova.beta:id/contentImageView")
+    TEXT_CONTENT = (By.CLASS_NAME, "android.view.View")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -102,10 +109,10 @@ class EnovaChatPage(BasePage):
             self.play(audio_path)
 
     def get_answer_from_chat(self):
-        pass
+        return self.get_element_text_by_locator(self.ANSWER_TEXT)
 
-    def check_answer_in_chat(self):
-        pass
+    def is_answer_in_chat(self):
+        return self.find_element(self.ANSWER)
 
     def is_meeting_button(self):
         return self.is_element_by_locator(self.MEETING_BUTTON)
@@ -115,3 +122,27 @@ class EnovaChatPage(BasePage):
 
     def get_wuw_text(self):
         return self.get_element_text_by_locator(self.WUW_TEXT)
+
+    def select_mode(self, mode_title):
+        self.click_by_locator(self.MENU_BUTTON)
+        menu_items = self.find_elements(self.MENU_LIST)
+        for item in menu_items:
+            if self.get_element_text_by_element(item) == "Select Mode" or self.get_element_text_by_element(item) == "Выберите режим":
+                self.click_by_element(item)
+                break
+        modes = self.find_elements(self.MODES_LIST)
+        for mode in modes:
+            if self.get_element_text_by_element(mode) == mode_title:
+                self.click_by_element(mode)
+                break
+
+    def is_image_content(self):
+        return self.is_element_by_locator(self.IMAGE_CONTENT)
+
+    def is_text_content(self):
+        return self.is_element_by_locator(self.TEXT_CONTENT)
+
+    def get_text_from_text_content(self):
+        return self.get_element_text_by_locator(self.TEXT_CONTENT)
+
+
