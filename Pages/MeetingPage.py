@@ -39,6 +39,7 @@ class MeetingPage(BasePage):
     MEETING_DETAILS_HEADER_TEXT = (By.ID, "com.harman.enova.beta:id/titleText")
     MEETING_SUBTITLES_TEXT = (By.ID, "com.harman.enova.beta:id/contentText")
     BACK_BUTTON_FOR_DETAILS = (By.ID, "com.harman.enova.beta:id/backButton")
+    SPEAKERS_LIST = (By.ID, "com.harman.enova.beta:id/meetingSpeaker")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -268,6 +269,16 @@ class MeetingPage(BasePage):
 
     def back_to_meeting_from_details(self):
         self.click_by_locator(self.BACK_BUTTON_FOR_DETAILS)
+
+    def is_speakers(self):
+        return self.is_element_by_locator(self.SPEAKERS_LIST)
+
+    def get_speakers_list(self):
+        speakers_list = []
+        speakers_elements = self.find_elements(self.SPEAKERS_LIST)
+        for speaker in speakers_elements:
+            speakers_list.append(self.get_element_text_by_element(speaker))
+        return speakers_list
 
     def wer(self, r, h):
         if not r:

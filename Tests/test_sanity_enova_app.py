@@ -475,12 +475,12 @@ class TestEnovaApp:
     """Change meeting name"""
 
     @pytest.mark.skip
-    @allure.description("Changing meeting name test")
     @pytest.mark.parametrize("new_name", [
         "New meeting",
         "Новый митинг",
         "!@#$%$%^^",
     ])
+    @allure.title("Changing meeting name test")
     def test_change_meeting_name(self, driver, login, server, user, protocol, language, new_name):
         self.meetings = MeetingPage(driver)
         with allure.step("Create new meeting"):
@@ -501,7 +501,7 @@ class TestEnovaApp:
     """Change meeting topics"""
 
     @pytest.mark.skip
-    @allure.description("Changing meeting topics test")
+    @allure.title("Changing meeting topics test")
     def test_change_meeting_topics(self, driver, login, server, user, protocol, language):
         self.meetings = MeetingPage(driver)
         with allure.step("Create new meeting"):
@@ -521,12 +521,12 @@ class TestEnovaApp:
     """Meeting recording audio"""
 
     @pytest.mark.skip
-    @allure.description("Meeting recording audio test")
     @pytest.mark.parametrize("audio_path, audio_lang, expected_text_path", [
         ("..\\TestData\\AudioData\\what_time_is_it.mp3", "English", "..\\TestData\\AudioData\\what_time_is_it.txt"),
         ("..\\TestData\\AudioData\\add_hoc_testing.mp3", "English", "..\\TestData\\AudioData\\add_hoc_testing.txt"),
         ("..\\TestData\\AudioData\\test_in_google.mp3", "Russian", "..\\TestData\\AudioData\\test_in_google.txt"),
     ])
+    @allure.title("Meeting recording audio test")
     def test_record_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang, expected_text_path):
         if language == audio_lang:
             self.meetings = MeetingPage(driver)
@@ -583,4 +583,32 @@ class TestEnovaApp:
 
         else:
             with allure.step(f"Test is skipped, because customer language is {language}, but audio language is {audio_lang}"):
+                pass
+
+    """Meeting speakers test"""
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize("audio_path, audio_lang, num_speakers", [
+        #("..\\TestData\\AudioData\\tess_and_ravi_short.aac", "English", 3),
+        ("..\\TestData\\AudioData\\ny.wav", "English", 2),
+    ])
+    @allure.title("Number of speakers in meeting test")
+    def test_num_speakers_in_meeting(self, driver, login, server, user, protocol, language, audio_path, audio_lang, num_speakers):
+        if language == audio_lang:
+            self.enova_actions = EnovaActions(driver)
+            self.meetings = MeetingPage(driver)
+
+            with allure.step(f"Record new meeting.Audio: {audio_path}"):
+                self.enova_actions.record_meeting(audio_path)
+
+            with allure.step(f"Check num of speakers in meeting. Expected num of speekers is {num_speakers}"):
+                assert self.meetings.is_speakers(), "Speakers are not presented in meeting"
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot", attachment_type=AttachmentType.PNG)
+                speakers_list = set(self.meetings.get_speakers_list())
+                assert len(speakers_list) == num_speakers or (len(speakers_list) == num_speakers + 1 and "?" in speakers_list), \
+                    "Number of speakers is incorrect"
+
+        else:
+            with allure.step(
+                    f"Test is skipped, because customer language is {language}, but audio language is {audio_lang}"):
                 pass
